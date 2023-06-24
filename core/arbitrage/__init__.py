@@ -35,4 +35,4 @@ class Ticket(object):
         return hash(self.ticket)
 
     def __repr__(self) -> str:
-        return f'Ticket [{self.ticket}][{self.alternative}]'
+        return f'[{self.ticket}]'

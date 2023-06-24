@@ -1,4 +1,5 @@
 from core.arbitrage import ArbitrageParser, Ticket
+from core.telegram_bot import TelegramBot
 import tqdm
 import itertools
 
@@ -29,8 +30,7 @@ tickets = {
     'BNB/BUSD'
 }
 
-start_crypto = 'USDT'
-finish_crypto = 'USDT'
+cycle_crypto = 'USDT'
 max_length_of_bundle = 3
 use_only_max = True
 deposit = 100
@@ -41,18 +41,23 @@ target_spead = 0.5
 
 def main():
     parser = ArbitrageParser(exchanges)
-    progress_bar = tqdm.tqdm(range(50))
+    bot = TelegramBot(
+        bot_token=input('Telegram Bot token (https://t.me/encore_securebot): '),
+        chat_id=input('Chat ID: '),
+    )
+    bot.send_message('Starting Parsing...')
+    progress_bar = tqdm.tqdm(range(5000))
 
     available_crypto = set()
     for t in tickets:
         available_crypto.add(t.split('/')[0])
         available_crypto.add(t.split('/')[1])
-    assert (start_crypto in available_crypto) and (finish_crypto in available_crypto)
+    assert (cycle_crypto in available_crypto)
 
     bundles = []
     for k in range((max_length_of_bundle-1) if use_only_max else 0, max_length_of_bundle):
         for b in itertools.combinations_with_replacement(available_crypto, k):
-            temp = [start_crypto] + list(b) + [finish_crypto]
+            temp = [cycle_crypto] + list(b) + [cycle_crypto]
             bundle = []
             for i in range(1, len(temp)):
                 bundle.append(f'{temp[i-1]}/{temp[i]}')
@@ -83,6 +88,7 @@ def main():
                             [ticket, exchange, result['bid'], result['ask']]
                         ]
         # 3) Analyze bundles
+        max_profit = 0
         for bundle in bundles:
             biection = []
             for component in bundle:
@@ -112,9 +118,20 @@ def main():
                             profit *= bid
                         # add tax
                         profit *= (1 - tax)
+                    max_profit = max(max_profit, profit)
                     if (profit/deposit-1)*100 >= target_spead:
+                        msg = f"""
+New Arbitrage Situation:
+Scheme: {path},
+► Deposit: {deposit:.5f} {cycle_crypto},
+◯ Total: {profit:.5f} {cycle_crypto},
+► Spread: {(profit/deposit-1)*100:.5f} %,
+◯ Profit: {profit-deposit:.5f} {cycle_crypto},
+"""
                         # call telegram
-                        print('DETECTED NEW PROFIT', profit)
+                        bot.send_message(message=msg)
+                        # Do log
+                        print(msg)
 
 
 
