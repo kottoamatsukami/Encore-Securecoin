@@ -1,89 +1,121 @@
-from core.arbitrage import DataParserDaemon
-from core.ui import UI
-import configparser
-import halo
+from core.arbitrage import ArbitrageParser, Ticket
+import tqdm
+import itertools
 
 
-#####################################
-config_path = './config.ini'
+###
 exchanges = [
     'binance',
-    'bybit',
+    'huobi',
+    'bybit'
 ]
-tickets = [
-    'USDT/BTC',
-    'HOT/USDT',
-]
-#####################################
 
+tickets = {
+    # Hot triangle
+    'HOT/USDT',
+    'HOT/ETH',
+    'ETH/USDT',
+    # IRIS triangle
+    'IRIS/USDT',
+    'IRIS/BTC',
+    'BTC/USDT',
+    # DOT
+    'DOT/USDT',
+    'DOT/BNB',
+    'DOT/ETH',
+    'DOT/BTC',
+    # BNB
+    'BNB/USDT',
+    'BNB/BUSD'
+}
+
+start_crypto = 'USDT'
+finish_crypto = 'USDT'
+max_length_of_bundle = 3
+use_only_max = True
+deposit = 100
+tax = 0.00075
+transfer_gaz = 1
+target_spead = 0.5
+###
 
 def main():
-    # ---
-    # Initialize
-    # ---
-    config = configparser.ConfigParser()
-    config.read(config_path)
+    parser = ArbitrageParser(exchanges)
+    progress_bar = tqdm.tqdm(range(50))
 
-    ui = UI(
-        config=config,
-        system='win'
+    available_crypto = set()
+    for t in tickets:
+        available_crypto.add(t.split('/')[0])
+        available_crypto.add(t.split('/')[1])
+    assert (start_crypto in available_crypto) and (finish_crypto in available_crypto)
+
+    bundles = []
+    for k in range((max_length_of_bundle-1) if use_only_max else 0, max_length_of_bundle):
+        for b in itertools.combinations_with_replacement(available_crypto, k):
+            temp = [start_crypto] + list(b) + [finish_crypto]
+            bundle = []
+            for i in range(1, len(temp)):
+                bundle.append(f'{temp[i-1]}/{temp[i]}')
+            bundles.append(bundle)
+
+
+    for _ in progress_bar:
+        # 1) Parse data
+        parser.parse(tickets)
+        progress_bar.set_description(
+            f'Parse time: {parser.parse_time}'
         )
+        data = parser.last_data
+        reformatted_data = dict()
 
-    parser_daemon = DataParserDaemon(
-        exchanges=exchanges,
-        tickets=tickets,
-    )
+        # 2) Reformatting the data
+        for type_ in data:
+            for exchange in type_.keys():
+                for result in type_[exchange]:
+                    if reformatted_data.__contains__(result['ticket']):
+                        ticket = Ticket(result['ticket'])
+                        reformatted_data[ticket].append(
+                            [ticket, exchange, result['bid'], result['ask']]
+                        )
+                    else:
+                        ticket = Ticket(result['ticket'])
+                        reformatted_data[Ticket(result['ticket'])] = [
+                            [ticket, exchange, result['bid'], result['ask']]
+                        ]
+        # 3) Analyze bundles
+        for bundle in bundles:
+            biection = []
+            for component in bundle:
+                for available_tickets in reformatted_data.keys():
+                    if available_tickets == component:
+                        biection.append(available_tickets)
+                        break
+            if len(biection) == len(bundle):
+                paths = [reformatted_data[biection[i]] for i in range(len(biection))]
+                all_paths = itertools.product(*paths)
+                for path in all_paths:
+                    profit = deposit
+                    last_exchange = None
+                    for i, part in enumerate(path):
+                        ticket, exchange, ask, bid = part
 
-    # ---
-    # UI Echo
-    # ---
-    while True:
-        ui.clear()
-        ui.get_main_menu()
-        menu_carrier = ui.get_choice()
+                        if not((last_exchange == exchange) or (last_exchange is None)):
+                            profit *= (1 - transfer_gaz/deposit)
 
-        if menu_carrier == '0':
-            # stop all daemons
-            exit(0)
-        elif menu_carrier == '1':
-            ui.get_cite_menu()
-        elif menu_carrier == '2':
-            while True:
-                ui.get_server_menu()
-                menu_carrier = ui.get_choice()
-                if menu_carrier == '0':
-                    break
-                elif menu_carrier == '1':
-                    # ADD PARSER
-                    name = input('Name: ')
-                    file = input('File: ')
-                    parser_daemon.create_daemon(
-                        name=name,
-                        save_file=file,
-                    )
-                elif menu_carrier == '2':
-                    # REM DAEMON
-                    print('REM DAEMON')
-                elif menu_carrier == '3':
-                    # SEND COMMAND
-                    while True:
-                        ui.get_send_command_menu()
-                        menu_carrier = ui.get_choice()
+                        target_base, target_quote = ticket.base, ticket.quote
+                        source_base, source_quote = bundle[i].split('/')
+                        if target_base != source_base:
+                            # /
+                            profit /= ask
+                        else:
+                            # *
+                            profit *= bid
+                        # add tax
+                        profit *= (1 - tax)
+                    if (profit/deposit-1)*100 >= target_spead:
+                        # call telegram
+                        print('DETECTED NEW PROFIT', profit)
 
-                        if menu_carrier == '0':
-                            break
-                        elif menu_carrier == '1':
-                            name = input('Name: ')
-                            print(parser_daemon.get_daemon_parse_time(name))
-                        elif menu_carrier == '2':
-                            name = input('Name: ')
-                            parser_daemon.stop_daemon(name)
-                        elif menu_carrier == '3':
-                            name = input('Name: ')
-                            parser_daemon.continue_daemon(name)
-
-                elif menu_carrier == '4':
-                    print(parser_daemon)
 
 
 if __name__ == '__main__':

@@ -1,63 +1,38 @@
-from core.arbitrage.parser import ExchangeParser
-import ccxt
+from core.arbitrage.CEX import CEXParser
+import time
 import threading
-import os
 
+class ArbitrageParser(object):
+    def __init__(self, exchanges: list[str]) -> None:
+        self.cex = CEXParser(exchanges)
+        self.dex = None
 
-class DataParserDaemon(object):
+        self.last_data = None
+        self.parse_time = float('inf')
 
-    def __init__(self) -> None:
-        self.parsers = dict()
-        self.threads = []
+    def parse(self, tickets: list[str]) -> None:
+        start_time = time.time()
 
-    def create_daemon(self, name: str, save_file: str, exchanges: list[str], tickets: list[str]) -> None:
-        exchanges = [
-            AVAILABLE_CEX_PARSERS[exchange.lower()]
-            for exchange in exchanges
-            if exchange.lower() in AVAILABLE_CEX_PARSERS
+        result = [
+            self.cex.parse(tickets),
+            {}
         ]
-        assert len(exchanges) != 0
+        self.last_data = result
+        self.parse_time = time.time() - start_time
 
-        self.parsers[name] = ExchangeParser(
-                                exchanges=exchanges,
-                                tickets=tickets,
-                            )
+class Ticket(object):
+    def __init__(self, ticket: str):
+        self.ticket, self.alternative = ticket, ticket.split('/')[1] + '/' + ticket.split('/')[0]
+        self.base, self.quote = ticket.split('/')
+    def __eq__(self, other):
+        if isinstance(other, str):
+            return self.ticket == other or self.alternative == other
 
-        open(save_file, 'w').close()
-        thread = threading.Thread(
-            target=self.parsers[name].parse_cycle,
-            args=[save_file]
-        )
-        thread.start()
-        return
+        if isinstance(other, Ticket):
+            return self.ticket == other.ticket or self.alternative == other.ticket
 
-    def remove_demon(self, name: str) -> None:
-        self.parsers.pop(name)
-
-    def get_daemon_parse_time(self, name: str) -> float:
-        return self.parsers[name].parse_time
-
-    def stop_daemon(self, name: str) -> None:
-        self.parsers[name].in_cycle = False
-
-    def continue_daemon(self, name: str) -> None:
-        self.parsers[name].in_cycle = True
+    def __hash__(self):
+        return hash(self.ticket)
 
     def __repr__(self) -> str:
-        log = ''
-        for i, name in enumerate(self.parsers):
-            log += f'{i+1}) {name} {"working" if self.parsers[name].in_cycle else "stopped"}\n'
-        return log
-
-
-AVAILABLE_CEX_PARSERS = {
-    'binance': ccxt.binance,
-    'bybit':   ccxt.bybit,
-    'gateio':  ccxt.gateio,
-    'huobi':   ccxt.huobi,
-    # 'okx':     ccxt.okx, # Unavailable in Russia
-}
-# TODO: Dex exchanges
-AVAILABLE_DEX_PARSERS = {
-
-}
+        return f'Ticket [{self.ticket}][{self.alternative}]'
