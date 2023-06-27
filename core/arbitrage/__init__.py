@@ -1,6 +1,6 @@
 from core.arbitrage.CEX import CEXParser
 import time
-import threading
+import configparser
 
 class ArbitrageParser(object):
     def __init__(self, exchanges: list[str]) -> None:
@@ -19,6 +19,7 @@ class ArbitrageParser(object):
         ]
         self.last_data = result
         self.parse_time = time.time() - start_time
+
 
 class Ticket(object):
     def __init__(self, ticket: str):
@@ -61,3 +62,6 @@ class Scheme(object):
 def criteria(worst: float, best: float, speed: float):
     assert 0 <= speed <= 1
     return worst*(1-speed) + best*speed
+
+
+
