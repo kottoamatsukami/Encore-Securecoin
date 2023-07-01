@@ -1,24 +1,53 @@
+from core import cli
+from core import telegram_bot
+from core import logging
+from core import encore_api
+from core import worker
 
-from core.logging import Logger
-from core.telegram_bot import start
-import tqdm
 import configparser
-import asyncio
+
+
+# from core.telegram_bot import start
+
+# import asyncio
 
 def main():
+    ####################################
+    # Initial
+    ####################################
     config = configparser.ConfigParser()
     config.read('./config.ini')
+    logger = logging.Logger(config=config)
 
-    logger = Logger(config=config)
-
-    asyncio.run(
-        start(
-            config=config,
-            logger=logger,
-        )
+    ####################################
+    # Prepare modules
+    ####################################
+    cli_module = cli.CLI(
+        process_name='CLI',
+        config=config,
+        logger=logger,
     )
-
-
+    bot_module = telegram_bot.TelegramBot(
+        process_name='TGBot',
+        config=config,
+        logger=logger,
+    )
+    worker_module = worker.Worker(
+        process_name='Worker',
+        config=config,
+        logger=logger,
+    )
+    ####################################
+    # Launch application
+    ####################################
+    app = encore_api.Application(
+        cli_module,
+        bot_module,
+        worker_module,
+        config=config,
+        logger=logger,
+    )
+    app.run()
 
 
 

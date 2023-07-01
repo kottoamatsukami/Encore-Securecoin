@@ -1,29 +1,14 @@
-choose_language = 'Choose your language'
-greeting = {
-    'GB': [
-        '👋🏼 Hello, {0}!',
-    ],
+##########################
+# Greeting for user
+##########################
+greeting = 'You are welcome to Encore:Securecoin! Please, type /menu to view bot`s options'
 
-}
-
-menu = 'Main menu'
-
-# Arbitrage
-arbitrage_info = {
-    'GB': '''
-Your task is written in the task queue.
-Parameters:
-    Deposit: {0},
-    Started exchanges: {1},
-    Finished exchanges: {2},
-    Cycle of: {3},
-    Max bundle length: {4},
-    Use only max length: {5},
-    Tax: {6},
-    Transfer gaz: {7},
-    Target spread: {8},
-    Speed: {9},
-    Special tickets: {10},
-    Blacklisted tickets: {11},
-'''
-}
+##########################
+# Main menu
+##########################
+main_menu_title =               "main menu"
+main_menu_spot_arbitrage_btn =  "spot arbitrage"
+main_menu_p2p_arbitrage_btn =   "p2p arbitrage"
+main_menu_multi_arbitrage_btn = "multi arbitrage"
+main_menu_whale_trading_btn =   "whale trading"
+main_menu_settings =            "settings"
