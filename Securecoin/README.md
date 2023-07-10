@@ -5,7 +5,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/kottoamatsukami/Encore-Securecoin">
-    <img src="data/img/logo.png" alt="Logo">
+    <img src="../../../../../Desktop/Securecoin/data/img/logo.png" alt="Logo">
   </a>
   <p align="center">
     A great Telegram Bot for making money on cryptocurrency!
