@@ -1,0 +1,4 @@
+2023-07-12 14:25:51,196 [INFO]: OSManager has connected
+2023-07-12 14:25:51,200 [INFO]: [ConsoleMenu] has initialized
+2023-07-12 14:26:59,976 [INFO]: append ['DEX', Menu:Use Flash Loan, Menu:Use Telegram Bot, Menu:Pancakeswap, Menu:Sushiswap, Menu:Uniswap, Menu:1INCH]
+2023-07-12 14:27:01,034 [INFO]: [DAEMON]: {'Use Telegram Bot': True, 'Use Flash Loan': True, 'Exchanges': ['Use Flash Loan', 'Use Telegram Bot', 'Pancakeswap', 'Sushiswap', 'Uniswap', '1INCH']}

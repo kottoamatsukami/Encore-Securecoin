@@ -1,7 +1,5 @@
 from core.exchanges.DEX import DEXAgregator
-from core.logging import Logger
 from core.utils import TimeManager
-from configparser import ConfigParser
 
 import numpy as np
 import itertools
@@ -16,26 +14,10 @@ import itertools
 
 
 class LoanArbitrageBot(object):
-    def __init__(self,
-                 used_networks,
-                 used_coins,
-                 used_exchanges,
-                 config: ConfigParser,
-                 logger: Logger,
-                 ) -> None:
-        self.used_networks = used_networks
-        self.used_coins = used_coins
-        self.used_exchanges = used_exchanges
-        self.config = config
-        self.logger = logger
+    def __init__(self, options: dict) -> None:
+        self.options = options
 
-        self.logger(f"[LoanArbitrageBot]: "
-                    f"Networks={self.used_networks} | "
-                    f"Coins={self.used_coins} | "
-                    f"Exchanges={self.used_exchanges}"
-                    )
-
-    def run(self, output_interface) -> None:
+    def run(self) -> dict:
         # 0) Create time manager
         time_manager = TimeManager()
         # 1) Generate all pairs of cryptocoin
