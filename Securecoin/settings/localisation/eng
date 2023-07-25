@@ -1,0 +1,12 @@
+[CLI]
+cex_dex_arbitrage_menu = CEX|DEX Arbitrage (Not implemented)
+cex_arbitrage_menu = CEX Arbitrage (Not implemented)
+dex_arbitrage_menu = DEX Arbitrage
+sniper_bot_menu = Sniper Bot (Not implemented)
+frontrunner_bot_menu = Frontrunner Bot (Not implemented)
+whale_trading_bot_menu = Whale Trading Bot (Not implemented)
+watch_wallet_bot_menu = Watch Wallet Bot
+
+exit_button_text = Exit
+back_button_text = Back
+confirm_button_text = Confirm

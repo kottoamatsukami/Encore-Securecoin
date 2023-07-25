@@ -6,11 +6,11 @@ WORKDIR /usr/src/app
 
 #CMD apt install rustc -y
 
-COPY requirements.txt ./
+COPY ../../../../../Desktop/New%20folder/requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
 
 COPY ./core ./core
 COPY ./data ./data
-COPY main.py .
+COPY ../../../../../Desktop/New%20folder/main.py .
 CMD [ "pypy3", "./main.py" ]

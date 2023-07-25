@@ -1,0 +1,25 @@
+# Colors:
+# black, red, green, yellow,
+# blue, magenta, cyan, white,
+# light_grey, dark_grey,
+# light_red, light_green, light_yellow,
+# light_blue, light_magenta, light_cyan.
+[terminal]
+foreground = black
+background = yellow
+
+[information]
+foreground = black
+background = red
+
+[not selected]
+foreground = black
+background = white
+
+[selected]
+foreground = green
+background = white
+
+[current selection]
+foreground = white
+background = black
