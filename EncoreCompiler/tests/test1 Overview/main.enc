@@ -1,0 +1,48 @@
+# One-line comment
+
+/*
+Multi
+    Line
+        Comment
+            Type 1
+*/
+
+"""
+Multi
+    Line
+        Comment
+            Type 2
+
+"""
+
+'''
+Multi
+    Line
+        Comment
+            Type 3
+'''
+
+/*
+Chapter 1: Preprocessor commands
+tabulation -> A number of spaces in one tab symbol [(int>0)]                (4)
+dialect    -> An alternative names for keywords    [(path to file)]         (standard)
+separation -> Type of block separation             [multi, brackets, tabs]  (multi)
+----
+use $ symbol in the beginning of command
+*/
+
+$tabulation 4
+$dialect    multi
+$separation multi
+
+/*
+Chapter 2: Assignment
+                not important
+                    v
+[const] [global] [type] identifier op_assign expression
+           ^
+        used in blocks
+*/
+const PI = 3.141592
+const double PHI = 1.62
+

@@ -1,0 +1,6 @@
+a = 1
+b = a + 1
+c = b - a
+d = c / e
+h = c + a * (2 - 3)
+b = "Hello, World!"
